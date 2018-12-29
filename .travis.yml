@@ -1,0 +1,39 @@
+language: julia
+os:
+  - linux
+julia:
+  - 0.6
+notifications:
+  email: false
+git:
+  depth: 99999999
+cache:
+  timeout: 1000
+  directories:
+    - downloads
+env:
+  global:
+    - BINARYBUILDER_DOWNLOADS_CACHE=downloads
+    - BINARYBUILDER_AUTOMATIC_APPLE=true
+sudo: required
+
+# Before anything else, get the latest versions of things
+before_script:
+  - julia -e 'Pkg.clone("https://github.com/JuliaPackaging/BinaryProvider.jl")'
+  - julia -e 'Pkg.clone("https://github.com/JuliaPackaging/BinaryBuilder.jl"); Pkg.build()'
+
+script:
+  - julia build_tarballs.jl
+
+deploy:
+    provider: releases
+    api_key:
+        # Note; this api_key is only valid for JuliaDiffEq/SundialsBuilder; you need
+        # to make your own: https://docs.travis-ci.com/user/deployment/releases/
+        secure: Lor5OaMSvxagIdkH3ybwv/rjTgMDrlWAOG2wRL3B/T2llpImoGrOC+gLcuguqdR2dfqt9nmhsCi2x1LY0YPHZUJT4t6NiCNAxz3Y+/n1Rbdri8/iOvgWzYoiw2Ta3d7zg1gx77iTW7XqNzdDPr5nMmOgzlvDTOT0Ov6MYdQrURWBn5G6XnLoTmMRlkSNpBCkdrqY/ZIdTlaHRIgBUfgyzwzPSftyr+3eLLDX9OZ/wRz9sRu16KB474+xJ+Lg+aZ1zoOmljHiMohIpwhSEeWRiVIFMMx3y9gLkPfTQJsnnc3UkF7ofNeTGMKWOVaPq6jnA/X/tBX/IRfWXzd+iDpwn8tWE5h/KT4ebWPTdXfXDgUJtNdOfMZEO1cykuzfuNfynZ2QecpblsPJi9MfiwDcOFOvVrnLOn6oshjCVZptJs77RO3ciIpx4+LTVwPHyKYMp+iB+4BAos1N3UR9Lvp5CZo1kwuPzGQojWQsBTjeCKjhAjN5cC6ajcnlAxGtEAdPqDrboPmPkUkA+aZgGDmcWCMCgCi2rf3zRbhokibWRiBnDcXjx7NZfpOdXrPTVmwNU7A0vlF8k636TyeSysbFlGJHSCACiMI9hlh8JpqM7uuf1JGJP4in6Y53MQYgwRTK1+UB1SRFRsYsDHbenb5FRnRtOyxCu4g912VbVue3mew=
+    file_glob: true
+    file: products/*
+    skip_cleanup: true
+    on:
+        repo: JuliaDiffEq/SundialsBuilder
+        tags: true
